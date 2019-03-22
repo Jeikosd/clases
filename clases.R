@@ -37,3 +37,24 @@ ggplot() +
   theme_bw() +
   facet_wrap(~origin) +
   labs(x = "Date", y = "Temperature")
+
+
+
+y <- x %>%
+  group_by(origin, month) %>%
+  summarise(temp_mean = mean(temp, na.rm = T),
+            temp_sd = sd(temp, na.rm = T))
+
+ggplot() +
+  geom_col(data = y, aes(x = month, y = temp_mean))
+
+library(forcats)
+y %>%
+  mutate(y = as_factor(month))
+
+y <- y %>%
+  mutate(month = month(month, label = T))
+
+ggplot() +
+  geom_col(data = y, aes(x = month, y = temp_mean)) +
+  theme_bw()
