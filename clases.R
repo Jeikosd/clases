@@ -154,6 +154,34 @@ data %>%
 
 
 
+#####
+
+
+library(readr) ## para cargar archivos de texto plano
+library(dplyr) ## para manipular bases de datos
+
+x <- read_csv(file = "D:/CIAT/Github/clases/data/data.csv")
+#
+avg <-  x %>% 
+ group_by(Nationality) %>% 
+  summarise(avg_overall = mean(Overall, na.rm = T), avg_age = mean(Age, na.rm = T), 
+            number_player = n(), sd_overall = sd(Overall, na.rm = T))
+
+
+avg %>% 
+  top_n(15, avg_overall)
+
+
+avg %>% 
+  top_n(15, -avg_overall)
+
+x %>% 
+  top_n(100, )
+
+
+
+
+
 
 
 
