@@ -2,24 +2,32 @@ library(readr) ### importar
 library(lubridate) ## fechas
 library(anytime)  ## fechas
 library(dplyr)    ## manejo de datos
+MMYYYYDD
+YYYYMMDD
 
 path <- "data/"
-
+# paste(path, "weather.csv", sep = "")
+# paste0(path, "weather.csv")
 x <- read_csv(paste(path, 'weather.csv', sep = ""))  ## cargar informacion
+x
 
-
-x <- mutate(x, date_1 =
+x <- x %>% 
+  mutate(date_1 =
               ymd(paste(year, month, day, sep = "-"))) ## creando una columna date_1
 
 select(x, year, month, day, date_1)
 
 y <- group_by(x, origin)
 summarise(y, temp_mean = mean(temp, na.rm = T))
+7 + NA + 8 = NA
+(7 + 8) / 2 = 7.5
+summarise(x, temp_mean = mean(temp, na.rm = T))
 
 x %>%
   group_by(origin, month) %>%
   summarise(temp_mean = mean(temp, na.rm = T),
-            temp_sd = sd(temp, na.rm = T))
+            temp_sd = sd(temp, na.rm = T),
+            temp_var = var(temp, na.rm = T))
 
 
 library(ggplot2)  ## motor de graficos hadley
@@ -40,8 +48,6 @@ ggplot() +
   ggtitle(label = "Prueba", subtitle = "2013")
 
 
-
-
 y <- x %>%
   group_by(origin, month) %>%
   summarise(temp_mean = mean(temp, na.rm = T),
@@ -50,13 +56,18 @@ y <- x %>%
 ggplot() +
   geom_col(data = y, aes(x = month, y = temp_mean))
 
-library(forcats)
+library(forcats) ## para trabajar factores
 
-y %>%
-  mutate(month = as_factor(month))
+# y <- y %>%
+#   mutate(month = as_factor(month))
+
+ggplot() +
+  geom_col(data = y, aes(x = month, y = temp_mean))
 
 y <- y %>%
   mutate(month = month(month, label = T, abbr = F))
+
+
 
 ggplot() +
   geom_col(data = y, aes(x = month, y = temp_mean, fill = origin)) +
@@ -90,7 +101,7 @@ ggplot()+
 
 
 ggplot() +
-  geom_boxplot(data = x, aes(x = month, y = temp))
+  geom_boxplot(data = x, aes(x = month, y = temp, group = month))
 
 
 
@@ -108,10 +119,25 @@ ggplot() +
   theme_bw() +
   scale_fill_grey()
 
+by_origin <- x %>% 
+  group_by(origin) %>% 
+  summarise(temp_mean = mean(temp, na.rm = T))
 
+left_join(x, by_origin, by = "origin") %>% 
+  dplyr::select(origin, temp, temp_mean) %>% 
+  mutate(temp_mod = temp - temp_mean)
 
+datos <- list()
 
+for(i in 1:6){
+  
+  datos[[i]] <- read_csv(file = paste0(path, "Weather_station_", i,
+                                  ".csv"))
+  
+}
 
+archivos <- list.files(path, pattern = "*.csv", full.names = T)
+datos_list <- lapply(archivos, read_csv)
 
 
 library(readr)
@@ -133,6 +159,7 @@ class(data)
 str(data)
 
 library(stringr) ## para manejo de strings cadenas de texto
+
 read_csv_mod <- function(x){
   
   data <- read_csv(x)
@@ -145,14 +172,15 @@ read_csv_mod <- function(x){
 data <- lapply(files, read_csv_mod)
 
 library(purrr)
-data <- map(.x = files, .f = read_csv_mod) %>%
+library(future)
+library(future.apply)
+purrr::map()
+data <- map(.x = files, .f = read_csv_mod) %>% 
   bind_rows()
 
 data %>%
   group_by(id, year, month) %>%
   summarise(t_max_avg = mean(t_max))
-
-
 
 #####
 
@@ -177,15 +205,4 @@ avg %>%
 
 x %>% 
   top_n(100, )
-
-
-
-
-
-
-
-
-
-
-
 
